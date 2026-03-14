@@ -1,0 +1,143 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mini Meesho Login / Signup</title>
+<style>
+body{
+    margin:0;
+    font-family:Poppins, sans-serif;
+    background: #f8f8f8;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+}
+.container{
+    background:white;
+    padding:30px;
+    border-radius:15px;
+    box-shadow:0 4px 15px rgba(0,0,0,0.2);
+    width:300px;
+}
+h2{
+    text-align:center;
+    margin-bottom:20px;
+    color:violet;
+}
+input{
+    width:100%;
+    padding:10px;
+    margin:10px 0;
+    border-radius:5px;
+    border:1px solid #ccc;
+}
+button{
+    width:100%;
+    padding:10px;
+    margin-top:10px;
+    border:none;
+    border-radius:5px;
+    background:violet;
+    color:white;
+    cursor:pointer;
+    font-size:16px;
+}
+button:hover{
+    opacity:0.9;
+}
+.toggle-link{
+    text-align:center;
+    margin-top:10px;
+    cursor:pointer;
+    color:violet;
+}
+</style>
+</head>
+<body>
+
+<div class="container" id="authContainer">
+
+<h2 id="formTitle">Login</h2>
+
+<form id="authForm">
+    <input type="text" id="username" placeholder="Username" required>
+    <input type="email" id="email" placeholder="Email" required>
+    <input type="password" id="password" placeholder="Password" required>
+    <button type="submit" id="submitBtn">Login</button>
+</form>
+
+<div class="toggle-link" id="toggleForm">Don't have an account? Signup</div>
+
+</div>
+
+<script>
+// ===== Elements =====
+const authForm = document.getElementById("authForm");
+const formTitle = document.getElementById("formTitle");
+const submitBtn = document.getElementById("submitBtn");
+const toggleForm = document.getElementById("toggleForm");
+const usernameInput = document.getElementById("username");
+const emailInput = document.getElementById("email");
+const passwordInput = document.getElementById("password");
+
+let isLogin = true;
+
+// ===== Toggle Login / Signup =====
+toggleForm.addEventListener("click", ()=>{
+    isLogin = !isLogin;
+    if(isLogin){
+        formTitle.innerText = "Login";
+        submitBtn.innerText = "Login";
+        toggleForm.innerText = "Don't have an account? Signup";
+        emailInput.style.display = "none";
+    }else{
+        formTitle.innerText = "Signup";
+        submitBtn.innerText = "Signup";
+        toggleForm.innerText = "Already have an account? Login";
+        emailInput.style.display = "block";
+    }
+});
+
+// ===== Hide email on login by default =====
+emailInput.style.display = "none";
+
+// ===== Auth Form Submit =====
+authForm.addEventListener("submit", (e)=>{
+    e.preventDefault();
+    const username = usernameInput.value.trim();
+    const email = emailInput.value.trim();
+    const password = passwordInput.value.trim();
+
+    let users = JSON.parse(localStorage.getItem("users") || "{}");
+
+    if(isLogin){
+        // LOGIN
+        if(users[username] && users[username].password === password){
+            localStorage.setItem("loggedInUser", JSON.stringify(users[username]));
+            alert("Login successful!");
+            window.location.href = "home.html";
+        }else{
+            alert("Invalid username or password!");
+        }
+    }else{
+        // SIGNUP
+        if(users[username]){
+            alert("Username already exists!");
+        }else{
+            users[username] = {username, email, password};
+            localStorage.setItem("users", JSON.stringify(users));
+            localStorage.setItem("loggedInUser", JSON.stringify(users[username]));
+            alert("Signup successful!");
+            window.location.href = "home.html";
+        }
+    }
+
+    authForm.reset();
+});
+</script>
+
+</body>
+</html>
