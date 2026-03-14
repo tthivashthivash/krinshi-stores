@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mini Meesho - Cart</title>
+<style>
+body{margin:0;font-family:'Poppins',sans-serif;background:#f8f8f8;}
+header.navbar{display:flex;justify-content:space-between;align-items:center;padding:15px 30px;background:linear-gradient(135deg,violet,skyblue);color:white;}
+header .logo{font-size:26px;font-weight:bold;cursor:pointer;}
+header .nav-icons span{margin-left:20px;cursor:pointer;font-weight:bold;}
+main{padding:20px;max-width:900px;margin:auto;}
+.cart-item{display:flex;align-items:center;justify-content:space-between;background:white;padding:15px;margin-bottom:15px;border-radius:10px;box-shadow:0 2px 6px rgba(0,0,0,0.1);}
+.cart-item img{width:80px;border-radius:10px;}
+.cart-item-details{flex:1;margin-left:15px;}
+.cart-item-details h3{margin:0 0 5px 0;}
+.cart-item-details p{margin:5px 0;}
+.cart-item input[type=number]{width:60px;padding:5px;}
+.cart-item button{padding:5px 10px;border:none;border-radius:5px;background:red;color:white;cursor:pointer;}
+.total{text-align:right;font-size:18px;font-weight:bold;margin-top:20px;}
+.proceed-btn{padding:10px 20px;border:none;border-radius:20px;background:violet;color:white;cursor:pointer;margin-top:10px;float:right;}
+.proceed-btn:hover{opacity:0.8;}
+</style>
+</head>
+<body>
+
+<header class="navbar">
+    <div class="logo" onclick="redirect('home.html')">Mini Meesho</div>
+    <div class="nav-icons">
+        <span onclick="redirect('wishlist.html')">❤️ Wishlist</span>
+        <span onclick="redirect('cart.html')">🛒 Cart</span>
+        <span onclick="redirect('orders.html')">📦 Orders</span>
+        <span onclick="redirect('profile.html')">👤 Profile</span>
+    </div>
+</header>
+
+<main>
+    <h1>Your Cart</h1>
+    <div id="cartContainer"></div>
+    <div class="total" id="totalAmount"></div>
+    <button class="proceed-btn" onclick="checkout()">Proceed to Checkout</button>
+</main>
+
+<script>
+function redirect(page){window.location.href=page;}
+
+// LOGIN CHECK
+let loggedInUser = JSON.parse(localStorage.getItem("loggedInUser"));
+if(!loggedInUser){ alert("Login first"); redirect("index.html"); }
+
+// DUMMY PRODUCTS
+const products=[
+    {id:1,name:"Product A",price:499,image:"https://via.placeholder.com/200?text=A"},
+    {id:2,name:"Product B",price:799,image:"https://via.placeholder.com/200?text=B"},
+    {id:3,name:"Product C",price:299,image:"https://via.placeholder.com/200?text=C"},
+    {id:4,name:"Product D",price:999,image:"https://via.placeholder.com/200?text=D"}
+];
+
+// LOAD CART
+function loadCart(){
+    let cart = JSON.parse(localStorage.getItem("cart")||"[]");
+    const container = document.getElementById("cartContainer");
+    container.innerHTML="";
+    let total = 0;
+
+    if(cart.length===0){ container.innerHTML="<p>Your cart is empty.</p>"; document.getElementById("totalAmount").innerText=""; return; }
+
+    cart.forEach(item=>{
+        let product = products.find(p=>p.id===item.id);
+        if(!product) return;
+        total += product.price * item.quantity;
+
+        const div = document.createElement("div");
+        div.className="cart-item";
+        div.innerHTML=`
+            <img src="${product.image}">
+            <div class="cart-item-details">
+                <h3>${product.name}</h3>
+                <p>Price: ₹${product.price}</p>
+                <label>Qty:</label>
+                <input type="number" min="1" value="${item.quantity}" onchange="updateQty(${product.id}, this.value)">
+            </div>
+            <button onclick="removeItem(${product.id})">Remove</button>
+        `;
+        container.appendChild(div);
+    });
+
+    document.getElementById("totalAmount").innerText="Total: ₹"+total;
+}
+
+function updateQty(id, qty){
+    let cart = JSON.parse(localStorage.getItem("cart")||"[]");
+    let item = cart.find(i=>i.id===id);
+    if(item){ item.quantity = parseInt(qty); }
+    localStorage.setItem("cart", JSON.stringify(cart));
+    loadCart();
+}
+
+function removeItem(id){
+    let cart = JSON.parse(localStorage.getItem("cart")||"[]");
+    cart = cart.filter(i=>i.id!==id);
+    localStorage.setItem("cart",JSON.stringify(cart));
+    loadCart();
+}
+
+function checkout(){
+    if(!JSON.parse(localStorage.getItem("cart")||"[]").length){ alert("Cart empty!"); return; }
+    redirect("checkout.html");
+}
+
+// INITIAL LOAD
+loadCart();
+</script>
+
+</body>
+</html>

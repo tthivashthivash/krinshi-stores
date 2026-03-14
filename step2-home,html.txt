@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mini Meesho - Home</title>
+<style>
+body{margin:0;font-family:Poppins,sans-serif;background:#f8f8f8;}
+header.navbar{display:flex;justify-content:space-between;align-items:center;padding:15px 30px;background:linear-gradient(135deg,violet,skyblue);color:white;}
+.logo{font-size:26px;font-weight:bold;cursor:pointer;}
+.nav-icons span{margin-left:20px;cursor:pointer;font-weight:bold;}
+main{padding:20px;display:flex;flex-wrap:wrap;justify-content:center;gap:20px;}
+.product-card{background:white;border-radius:15px;padding:15px;width:200px;box-shadow:0 3px 6px rgba(0,0,0,0.1);cursor:pointer;position:relative;}
+.wishlist-btn{position:absolute;top:10px;right:10px;font-size:22px;color:#bbb;cursor:pointer;}
+.wishlist-btn.active{color:red;}
+</style>
+</head>
+<body>
+
+<header class="navbar">
+<div class="logo" onclick="redirect('home.html')">Mini Meesho</div>
+<div class="nav-icons">
+<span onclick="redirect('wishlist.html')">❤️ Wishlist</span>
+<span onclick="redirect('cart.html')">🛒 Cart</span>
+<span onclick="redirect('orders.html')">📦 Orders</span>
+<span onclick="redirect('profile.html')">👤 Profile</span>
+</div>
+</header>
+
+<main id="productsContainer"></main>
+
+<script>
+function redirect(page){window.location.href=page;}
+let loggedInUser=JSON.parse(localStorage.getItem('loggedInUser'));
+if(!loggedInUser){alert('Login first');redirect('index.html');}
+let allWishlists=JSON.parse(localStorage.getItem('wishlist')||'{}');
+if(!allWishlists[loggedInUser.username]){allWishlists[loggedInUser.username]=[]; localStorage.setItem('wishlist',JSON.stringify(allWishlists));}
+
+const products=[
+{id:1,name:"Product A",price:499,description:"This is Product A",image:"https://via.placeholder.com/200?text=A"},
+{id:2,name:"Product B",price:799,description:"This is Product B",image:"https://via.placeholder.com/200?text=B"},
+{id:3,name:"Product C",price:299,description:"This is Product C",image:"https://via.placeholder.com/200?text=C"},
+{id:4,name:"Product D",price:999,description:"This is Product D",image:"https://via.placeholder.com/200?text=D"},
+];
+
+const container=document.getElementById('productsContainer');
+
+function saveWishlist(){localStorage.setItem('wishlist',JSON.stringify(allWishlists));}
+
+products.forEach(p=>{
+    const card=document.createElement('div');
+    card.className='product-card';
+    let userWishlist=allWishlists[loggedInUser.username];
+    card.innerHTML=`
+    <div class="wishlist-btn ${userWishlist.includes(p.id)?'active':''}">❤</div>
+    <img src="${p.image}" style="width:100%;border-radius:10px;">
+    <h3>${p.name}</h3>
+    <p>₹${p.price}</p>
+    <p>${p.description.substring(0,30)}...</p>
+    `;
+    const heart=card.querySelector('.wishlist-btn');
+    heart.onclick=(e)=>{
+        e.stopPropagation();
+        let userWishlist=allWishlists[loggedInUser.username];
+        if(userWishlist.includes(p.id)){allWishlists[loggedInUser.username]=userWishlist.filter(id=>id!==p.id);heart.classList.remove('active');}
+        else{userWishlist.push(p.id);heart.classList.add('active');}
+        saveWishlist();
+    }
+    card.onclick=()=>{
+        localStorage.setItem('selectedProduct',p.id);
+        redirect('product.html');
+    }
+    container.appendChild(card);
+});
+
+// SEARCH SYSTEM
+const searchInput=document.createElement('input');
+searchInput.placeholder='Search products...';
+searchInput.style.width='100%';
+searchInput.style.padding='10px';
+searchInput.style.margin='10px 0';
+searchInput.addEventListener('input',()=>{
+    const val=searchInput.value.toLowerCase();
+    container.innerHTML='';
+    products.filter(p=>p.name.toLowerCase().includes(val)).forEach(p=>{
+        const card=document.createElement('div');
+        card.className='product-card';
+        let userWishlist=allWishlists[loggedInUser.username];
+        card.innerHTML=`
+        <div class="wishlist-btn ${userWishlist.includes(p.id)?'active':''}">❤</div>
+        <img src="${p.image}" style="width:100%;border-radius:10px;">
+        <h3>${p.name}</h3>
+        <p>₹${p.price}</p>
+        <p>${p.description.substring(0,30)}...</p>
+        `;
+        const heart=card.querySelector('.wishlist-btn');
+        heart.onclick=(e)=>{
+            e.stopPropagation();
+            let userWishlist=allWishlists[loggedInUser.username];
+            if(userWishlist.includes(p.id)){allWishlists[loggedInUser.username]=userWishlist.filter(id=>id!==p.id);heart.classList.remove('active');}
+            else{userWishlist.push(p.id);heart.classList.add('active');}
+            saveWishlist();
+        }
+        card.onclick=()=>{
+            localStorage.setItem('selectedProduct',p.id);
+            redirect('product.html');
+        }
+        container.appendChild(card);
+    });
+});
+container.parentNode.insertBefore(searchInput,container);
+
+</script>
+
+</body>
+</html>

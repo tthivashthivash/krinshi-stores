@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mini Meesho - Profile</title>
+<style>
+body{margin:0;font-family:'Poppins',sans-serif;background:#f8f8f8;}
+header.navbar{display:flex;justify-content:space-between;align-items:center;padding:15px 30px;background:linear-gradient(135deg,violet,skyblue);color:white;}
+header .logo{font-size:26px;font-weight:bold;cursor:pointer;}
+header .nav-icons span{margin-left:20px;cursor:pointer;font-weight:bold;}
+main{padding:20px;max-width:500px;margin:30px auto;background:white;border-radius:15px;box-shadow:0 3px 6px rgba(0,0,0,0.1);}
+main h2{text-align:center;margin-bottom:20px;}
+.profile-info p{margin:10px 0;font-size:16px;}
+button{padding:10px 15px;border:none;border-radius:20px;background:violet;color:white;cursor:pointer;width:100%;font-size:16px;transition:0.3s;}
+button:hover{opacity:0.8;}
+</style>
+</head>
+<body>
+
+<header class="navbar">
+<div class="logo" onclick="redirect('home.html')">Mini Meesho</div>
+<div class="nav-icons">
+<span onclick="redirect('home.html')">🏠 Home</span>
+<span onclick="redirect('wishlist.html')">❤️ Wishlist</span>
+<span onclick="redirect('cart.html')">🛒 Cart</span>
+<span onclick="redirect('orders.html')">📦 Orders</span>
+<span onclick="redirect('profile.html')">👤 Profile</span>
+</div>
+</header>
+
+<main>
+<h2>Your Profile</h2>
+<div class="profile-info" id="profileInfo"></div>
+<button id="logoutBtn">Logout</button>
+</main>
+
+<script>
+function redirect(page){ window.location.href=page; }
+
+// LOGIN CHECK
+let user = JSON.parse(localStorage.getItem("loggedInUser"));
+if(!user){ alert("Login first"); redirect("index.html"); }
+
+// SHOW PROFILE INFO
+const infoDiv = document.getElementById("profileInfo");
+infoDiv.innerHTML = `
+<p><strong>Username:</strong> ${user.username}</p>
+<p><strong>Email:</strong> ${user.email || '-'}</p>
+<p><strong>Phone:</strong> ${user.phone || '-'}</p>
+`;
+
+// LOGOUT FUNCTION
+document.getElementById("logoutBtn").onclick = function(){
+    localStorage.removeItem("loggedInUser");
+    alert("Logged out successfully!");
+    redirect("index.html");
+};
+</script>
+
+</body>
+</html>

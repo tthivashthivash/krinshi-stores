@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mini Meesho - Wishlist</title>
+<style>
+body{margin:0;font-family:'Poppins',sans-serif;background:#f8f8f8;}
+header.navbar{display:flex;justify-content:space-between;align-items:center;padding:15px 30px;background:linear-gradient(135deg,violet,skyblue);color:white;}
+header .logo{font-size:26px;font-weight:bold;cursor:pointer;}
+header .nav-icons span{margin-left:20px;cursor:pointer;font-weight:bold;}
+main{padding:20px;max-width:900px;margin:auto;}
+.wishlist-container{display:flex;flex-wrap:wrap;gap:20px;justify-content:center;}
+.wishlist-item{background:white;border-radius:15px;padding:15px;width:200px;box-shadow:0 3px 6px rgba(0,0,0,0.1);text-align:center;position:relative;}
+.wishlist-item img{width:100%;border-radius:10px;cursor:pointer;}
+.wishlist-item h3{margin:10px 0 5px 0;}
+.wishlist-item p{margin:5px 0;color:gray;}
+.wishlist-item button{padding:8px 12px;margin-top:10px;border:none;border-radius:5px;background:violet;color:white;cursor:pointer;}
+</style>
+</head>
+<body>
+
+<header class="navbar">
+<div class="logo" onclick="redirect('home.html')">Mini Meesho</div>
+<div class="nav-icons">
+<span onclick="redirect('home.html')">🏠 Home</span>
+<span onclick="redirect('wishlist.html')">❤️ Wishlist</span>
+<span onclick="redirect('cart.html')">🛒 Cart</span>
+<span onclick="redirect('orders.html')">📦 Orders</span>
+<span onclick="redirect('profile.html')">👤 Profile</span>
+</div>
+</header>
+
+<main>
+<h2 style="text-align:center;">Your Wishlist</h2>
+<div class="wishlist-container" id="wishlistContainer"></div>
+</main>
+
+<script>
+function redirect(page){window.location.href=page;}
+
+// LOGIN USER
+let user = JSON.parse(localStorage.getItem("loggedInUser"));
+if(!user){ alert("Login first"); redirect("index.html"); }
+let username = user.username;
+
+// PRODUCTS
+const products = [
+    {id:1,name:"Product A",price:499,image:"https://via.placeholder.com/200?text=A"},
+    {id:2,name:"Product B",price:799,image:"https://via.placeholder.com/200?text=B"},
+    {id:3,name:"Product C",price:299,image:"https://via.placeholder.com/200?text=C"},
+    {id:4,name:"Product D",price:999,image:"https://via.placeholder.com/200?text=D"}
+];
+
+// LOAD WISHLIST
+let wishlistData = JSON.parse(localStorage.getItem("wishlist")||"{}");
+if(!wishlistData[username]) wishlistData[username]=[];
+
+// SAVE FUNCTION
+function saveWishlist(){ localStorage.setItem("wishlist",JSON.stringify(wishlistData)); }
+
+// RENDER WISHLIST
+function renderWishlist(){
+    const container = document.getElementById("wishlistContainer");
+    container.innerHTML="";
+
+    const userWishlist = wishlistData[username];
+    if(userWishlist.length===0){
+        container.innerHTML="<p style='text-align:center;'>Your wishlist is empty.</p>";
+        return;
+    }
+
+    userWishlist.forEach(id=>{
+        const product = products.find(p=>p.id===id);
+        if(!product) return;
+
+        const div = document.createElement("div");
+        div.className="wishlist-item";
+        div.innerHTML=`
+            <img src="${product.image}" onclick="viewProduct(${product.id})">
+            <h3>${product.name}</h3>
+            <p>₹${product.price}</p>
+            <button onclick="removeItem(${product.id})">Remove</button>
+        `;
+        container.appendChild(div);
+    });
+}
+
+// VIEW PRODUCT
+function viewProduct(id){
+    localStorage.setItem("selectedProduct",id);
+    redirect("product.html");
+}
+
+// REMOVE FROM WISHLIST
+function removeItem(id){
+    wishlistData[username] = wishlistData[username].filter(pid=>pid!==id);
+    saveWishlist();
+    renderWishlist();
+}
+
+// INITIAL RENDER
+renderWishlist();
+</script>
+
+</body>
+</html>

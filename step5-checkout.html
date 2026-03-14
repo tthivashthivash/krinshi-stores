@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mini Meesho - Checkout</title>
+<style>
+body{margin:0;font-family:'Poppins',sans-serif;background:#f8f8f8;}
+header.navbar{display:flex;justify-content:space-between;align-items:center;padding:15px 30px;background:linear-gradient(135deg,violet,skyblue);color:white;}
+header .logo{font-size:26px;font-weight:bold;cursor:pointer;}
+header .nav-icons span{margin-left:20px;cursor:pointer;font-weight:bold;}
+main{padding:20px;max-width:500px;margin:auto;background:white;border-radius:15px;box-shadow:0 3px 6px rgba(0,0,0,0.1);}
+main h2{text-align:center;margin-bottom:20px;}
+form{display:flex;flex-direction:column;}
+form input, form select{padding:10px;margin:10px 0;border-radius:5px;border:1px solid #ccc;font-size:16px;}
+button{padding:10px 15px;border:none;border-radius:20px;background:violet;color:white;cursor:pointer;font-size:16px;transition:0.3s;margin-top:10px;}
+button:hover{opacity:0.8;}
+</style>
+</head>
+<body>
+
+<header class="navbar">
+    <div class="logo" onclick="redirect('home.html')">Mini Meesho</div>
+    <div class="nav-icons">
+        <span onclick="redirect('wishlist.html')">❤️ Wishlist</span>
+        <span onclick="redirect('cart.html')">🛒 Cart</span>
+        <span onclick="redirect('orders.html')">📦 Orders</span>
+        <span onclick="redirect('profile.html')">👤 Profile</span>
+    </div>
+</header>
+
+<main>
+    <h2>Checkout</h2>
+    <form id="checkoutForm">
+        <input type="text" id="name" placeholder="Full Name" required>
+        <input type="text" id="address" placeholder="Address" required>
+        <input type="text" id="phone" placeholder="Phone Number" required>
+        <select id="payment" required>
+            <option value="">Select Payment Method</option>
+            <option value="Cash on Delivery">Cash on Delivery</option>
+            <option value="UPI">UPI</option>
+            <option value="Card">Card</option>
+        </select>
+        <button type="submit">Place Order</button>
+    </form>
+</main>
+
+<script>
+function redirect(page){window.location.href=page;}
+
+// LOGIN CHECK
+let loggedInUser = JSON.parse(localStorage.getItem("loggedInUser"));
+if(!loggedInUser){ alert("Login first"); redirect("index.html"); }
+
+// PLACE ORDER
+document.getElementById("checkoutForm").onsubmit = function(e){
+    e.preventDefault();
+
+    const name = document.getElementById("name").value;
+    const address = document.getElementById("address").value;
+    const phone = document.getElementById("phone").value;
+    const payment = document.getElementById("payment").value;
+
+    let cart = JSON.parse(localStorage.getItem("cart")||"[]");
+    if(cart.length===0){ alert("Cart is empty"); return; }
+
+    // Calculate total
+    const products = [
+        {id:1,name:"Product A",price:499},
+        {id:2,name:"Product B",price:799},
+        {id:3,name:"Product C",price:299},
+        {id:4,name:"Product D",price:999}
+    ];
+    let total = 0;
+    cart.forEach(item=>{
+        let p = products.find(pr=>pr.id===item.id);
+        if(p){ total += p.price*item.quantity; }
+    });
+
+    // Save order
+    let allOrders = JSON.parse(localStorage.getItem("orders")||"{}");
+    if(!allOrders[loggedInUser.username]){ allOrders[loggedInUser.username]=[]; }
+
+    allOrders[loggedInUser.username].push({
+        name, address, phone, payment, total, items:cart, date:new Date().toLocaleString()
+    });
+
+    localStorage.setItem("orders", JSON.stringify(allOrders));
+
+    // Clear cart
+    localStorage.setItem("cart","[]");
+    alert("Order placed successfully!");
+
+    redirect("orders.html");
+}
+</script>
+
+</body>
+</html>
